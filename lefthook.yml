@@ -1,0 +1,26 @@
+commit-msg:
+  commands:
+    validate:
+      run: |
+        if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?: .{1,72}$' {1}; then
+          echo "Error: Commit message must follow Conventional Commits format."
+          echo "  Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert"
+          echo "  Format: <type>(<scope>): <description>"
+          echo "  Breaking change: <type>!: <description>"
+          exit 1
+        fi
+
+pre-commit:
+  parallel: true
+  commands:
+    php-lint:
+      glob: "services/app/**/*.php"
+      run: echo {staged_files} | tr ' ' '\n' | sed 's|services/app/||' | xargs -r -I{} docker compose --env-file services/app/.env exec -T app php -l /var/www/{}
+    pint:
+      glob: "services/app/**/*.php"
+      run: echo {staged_files} | tr ' ' '\n' | sed 's|services/app/||' | xargs -r docker compose --env-file services/app/.env exec -T app ./vendor/bin/pint --test
+
+pre-push:
+  commands:
+    phpstan:
+      run: docker compose --env-file services/app/.env exec -T app ./vendor/bin/phpstan analyse
