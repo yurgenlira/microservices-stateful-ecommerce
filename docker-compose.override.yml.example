@@ -1,0 +1,8 @@
+# Copy to docker-compose.override.yml for local customizations.
+# docker-compose.override.yml is gitignored — safe for machine-specific settings.
+services:
+  app:
+    environment:
+      PHP_FPM_MAX_CHILDREN: 4   # tune to local RAM: ~30MB per worker
+    # ports:
+    #   - "9003:9003"           # expose Xdebug DAP port to host if needed

@@ -1,0 +1,13 @@
+{
+    "php.validate.enable": false,
+    "php.suggest.basic": false,
+    "editor.formatOnSave": true,
+    "intelephense.environment.phpVersion": "8.5",
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    },
+    "xdebug.port": 9003,
+    "xdebug.pathMappings": {
+        "/var/www": "${workspaceFolder}/services/app"
+    }
+}

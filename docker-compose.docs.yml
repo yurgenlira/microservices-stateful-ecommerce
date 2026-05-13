@@ -1,0 +1,8 @@
+services:
+  structurizr:
+    image: structurizr/structurizr:2026.04.19
+    command: local
+    volumes:
+      - ./docs/architecture:/usr/local/structurizr
+    ports:
+      - "8081:8080"

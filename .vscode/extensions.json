@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "bmewburn.vscode-intelephense-client",
+        "xdebug.php-debug",
+        "mikestead.dotenv",
+        "EditorConfig.EditorConfig",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens"
+    ]
+}

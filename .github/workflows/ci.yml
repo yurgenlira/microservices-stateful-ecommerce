@@ -1,0 +1,177 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+
+    services:
+      postgres:
+        image: postgres:18.3-alpine
+        env:
+          POSTGRES_DB: ecommerce_test
+          POSTGRES_USER: ecommerce
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7.4.9-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: pdo_pgsql, redis, intl, opcache, pcntl, zip, bcmath, gd
+          coverage: xdebug
+
+      - name: Get Composer cache dir
+        id: composer-cache
+        working-directory: services/app
+        run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        if: ${{ !env.ACT }}
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('services/app/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        working-directory: services/app
+        run: composer install --no-progress --prefer-dist
+
+      - name: Prepare environment
+        working-directory: services/app
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          mkdir -p storage/framework/{views,cache/data,sessions,testing} storage/coverage
+          php artisan migrate
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: ecommerce_test
+          DB_USERNAME: ecommerce
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PASSWORD: ""
+          REDIS_CACHE_DB: 0
+          REDIS_SESSION_DB: 1
+
+      - name: Run tests with coverage
+        working-directory: services/app
+        run: ./vendor/bin/pest --coverage --coverage-clover storage/coverage/clover.xml
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: ecommerce_test
+          DB_USERNAME: ecommerce
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PASSWORD: ""
+
+      - name: Coverage summary
+        if: always()
+        uses: clearlyip/code-coverage-report-action@v6
+        with:
+          filename: services/app/storage/coverage/clover.xml
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          overall_coverage_fail_threshold: 1
+          file_coverage_error_min: 50
+          file_coverage_warning_max: 75
+
+      - name: Post coverage comment on PR
+        if: ${{ !env.ACT && github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+      - name: PHPStan static analysis
+        working-directory: services/app
+        run: ./vendor/bin/phpstan analyse
+
+      - name: Laravel Pint code style
+        working-directory: services/app
+        run: ./vendor/bin/pint --test
+
+  build:
+    name: Docker Build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build production image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./services/app
+          file: services/app/docker/Dockerfile
+          target: production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false
+          load: true
+          tags: ecommerce:${{ github.sha }}
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ecommerce:${{ github.sha }}
+          format: table
+          severity: CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+  diagrams:
+    name: Architecture Diagrams
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Export C4 diagrams
+        run: |
+          mkdir -p docs/architecture/exports
+          docker run --rm \
+            -v "${{ github.workspace }}/docs/architecture:/docs" \
+            extenda/structurizr-to-png:latest \
+            --path workspace.dsl \
+            --output exports \
+            --render-with structurizr
+
+      - name: Upload diagram artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: architecture-diagrams
+          path: docs/architecture/exports/
+          retention-days: 30

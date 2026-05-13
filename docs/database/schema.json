@@ -1,0 +1,1445 @@
+{
+  "name": "ecommerce",
+  "tables": [
+    {
+      "name": "public.migrations",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('migrations_id_seq'::regclass)"
+        },
+        {
+          "name": "migration",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "batch",
+          "type": "integer",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "migrations_pkey",
+          "def": "CREATE UNIQUE INDEX migrations_pkey ON public.migrations USING btree (id)",
+          "table": "public.migrations",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "migrations_batch_not_null",
+          "type": "n",
+          "def": "NOT NULL batch",
+          "table": "public.migrations",
+          "referenced_table": "",
+          "columns": [
+            "batch"
+          ]
+        },
+        {
+          "name": "migrations_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.migrations",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "migrations_migration_not_null",
+          "type": "n",
+          "def": "NOT NULL migration",
+          "table": "public.migrations",
+          "referenced_table": "",
+          "columns": [
+            "migration"
+          ]
+        },
+        {
+          "name": "migrations_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.migrations",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.users",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('users_id_seq'::regclass)"
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "email_verified_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "password",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "role",
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": "'customer'::character varying"
+        },
+        {
+          "name": "remember_token",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "deleted_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "users_pkey",
+          "def": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)",
+          "table": "public.users",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "users_role_index",
+          "def": "CREATE INDEX users_role_index ON public.users USING btree (role)",
+          "table": "public.users",
+          "columns": [
+            "role"
+          ]
+        },
+        {
+          "name": "users_email_unique",
+          "def": "CREATE UNIQUE INDEX users_email_unique ON public.users USING btree (email)",
+          "table": "public.users",
+          "columns": [
+            "email"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "users_email_not_null",
+          "type": "n",
+          "def": "NOT NULL email",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "email"
+          ]
+        },
+        {
+          "name": "users_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "users_name_not_null",
+          "type": "n",
+          "def": "NOT NULL name",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "name"
+          ]
+        },
+        {
+          "name": "users_password_not_null",
+          "type": "n",
+          "def": "NOT NULL password",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "password"
+          ]
+        },
+        {
+          "name": "users_role_check",
+          "type": "CHECK",
+          "def": "CHECK (((role)::text = ANY ((ARRAY['customer'::character varying, 'admin'::character varying])::text[])))",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "role"
+          ]
+        },
+        {
+          "name": "users_role_not_null",
+          "type": "n",
+          "def": "NOT NULL role",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "role"
+          ]
+        },
+        {
+          "name": "users_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "users_email_unique",
+          "type": "UNIQUE",
+          "def": "UNIQUE (email)",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "email"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.categories",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('categories_id_seq'::regclass)"
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "slug",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "parent_id",
+          "type": "bigint",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "categories_pkey",
+          "def": "CREATE UNIQUE INDEX categories_pkey ON public.categories USING btree (id)",
+          "table": "public.categories",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "categories_slug_unique",
+          "def": "CREATE UNIQUE INDEX categories_slug_unique ON public.categories USING btree (slug)",
+          "table": "public.categories",
+          "columns": [
+            "slug"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "categories_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.categories",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "categories_name_not_null",
+          "type": "n",
+          "def": "NOT NULL name",
+          "table": "public.categories",
+          "referenced_table": "",
+          "columns": [
+            "name"
+          ]
+        },
+        {
+          "name": "categories_slug_not_null",
+          "type": "n",
+          "def": "NOT NULL slug",
+          "table": "public.categories",
+          "referenced_table": "",
+          "columns": [
+            "slug"
+          ]
+        },
+        {
+          "name": "categories_parent_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL",
+          "table": "public.categories",
+          "referenced_table": "public.categories",
+          "columns": [
+            "parent_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "categories_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.categories",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "categories_slug_unique",
+          "type": "UNIQUE",
+          "def": "UNIQUE (slug)",
+          "table": "public.categories",
+          "referenced_table": "",
+          "columns": [
+            "slug"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.products",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('products_id_seq'::regclass)"
+        },
+        {
+          "name": "category_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "slug",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "price",
+          "type": "numeric(10,2)",
+          "nullable": false
+        },
+        {
+          "name": "sku",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "deleted_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "products_pkey",
+          "def": "CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)",
+          "table": "public.products",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "products_sku_index",
+          "def": "CREATE INDEX products_sku_index ON public.products USING btree (sku)",
+          "table": "public.products",
+          "columns": [
+            "sku"
+          ]
+        },
+        {
+          "name": "products_category_id_index",
+          "def": "CREATE INDEX products_category_id_index ON public.products USING btree (category_id)",
+          "table": "public.products",
+          "columns": [
+            "category_id"
+          ]
+        },
+        {
+          "name": "products_is_active_created_at_index",
+          "def": "CREATE INDEX products_is_active_created_at_index ON public.products USING btree (is_active, created_at)",
+          "table": "public.products",
+          "columns": [
+            "is_active",
+            "created_at"
+          ]
+        },
+        {
+          "name": "products_slug_unique",
+          "def": "CREATE UNIQUE INDEX products_slug_unique ON public.products USING btree (slug)",
+          "table": "public.products",
+          "columns": [
+            "slug"
+          ]
+        },
+        {
+          "name": "products_sku_unique",
+          "def": "CREATE UNIQUE INDEX products_sku_unique ON public.products USING btree (sku)",
+          "table": "public.products",
+          "columns": [
+            "sku"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "products_category_id_not_null",
+          "type": "n",
+          "def": "NOT NULL category_id",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "category_id"
+          ]
+        },
+        {
+          "name": "products_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "products_is_active_not_null",
+          "type": "n",
+          "def": "NOT NULL is_active",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "is_active"
+          ]
+        },
+        {
+          "name": "products_name_not_null",
+          "type": "n",
+          "def": "NOT NULL name",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "name"
+          ]
+        },
+        {
+          "name": "products_price_not_null",
+          "type": "n",
+          "def": "NOT NULL price",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "price"
+          ]
+        },
+        {
+          "name": "products_sku_not_null",
+          "type": "n",
+          "def": "NOT NULL sku",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "sku"
+          ]
+        },
+        {
+          "name": "products_slug_not_null",
+          "type": "n",
+          "def": "NOT NULL slug",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "slug"
+          ]
+        },
+        {
+          "name": "products_category_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT",
+          "table": "public.products",
+          "referenced_table": "public.categories",
+          "columns": [
+            "category_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "products_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "products_slug_unique",
+          "type": "UNIQUE",
+          "def": "UNIQUE (slug)",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "slug"
+          ]
+        },
+        {
+          "name": "products_sku_unique",
+          "type": "UNIQUE",
+          "def": "UNIQUE (sku)",
+          "table": "public.products",
+          "referenced_table": "",
+          "columns": [
+            "sku"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.orders",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('orders_id_seq'::regclass)"
+        },
+        {
+          "name": "user_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": "'pending'::character varying"
+        },
+        {
+          "name": "total",
+          "type": "numeric(10,2)",
+          "nullable": false
+        },
+        {
+          "name": "shipping_address",
+          "type": "json",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "orders_pkey",
+          "def": "CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (id)",
+          "table": "public.orders",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "orders_user_id_status_index",
+          "def": "CREATE INDEX orders_user_id_status_index ON public.orders USING btree (user_id, status)",
+          "table": "public.orders",
+          "columns": [
+            "user_id",
+            "status"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "orders_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "orders_shipping_address_not_null",
+          "type": "n",
+          "def": "NOT NULL shipping_address",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "shipping_address"
+          ]
+        },
+        {
+          "name": "orders_status_check",
+          "type": "CHECK",
+          "def": "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'confirmed'::character varying, 'processing'::character varying, 'shipped'::character varying, 'delivered'::character varying, 'cancelled'::character varying])::text[])))",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "status"
+          ]
+        },
+        {
+          "name": "orders_status_not_null",
+          "type": "n",
+          "def": "NOT NULL status",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "status"
+          ]
+        },
+        {
+          "name": "orders_total_not_null",
+          "type": "n",
+          "def": "NOT NULL total",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "total"
+          ]
+        },
+        {
+          "name": "orders_user_id_not_null",
+          "type": "n",
+          "def": "NOT NULL user_id",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
+          "name": "orders_user_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT",
+          "table": "public.orders",
+          "referenced_table": "public.users",
+          "columns": [
+            "user_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "orders_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.orders",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.order_items",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('order_items_id_seq'::regclass)"
+        },
+        {
+          "name": "order_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "product_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "unit_price",
+          "type": "numeric(10,2)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "order_items_pkey",
+          "def": "CREATE UNIQUE INDEX order_items_pkey ON public.order_items USING btree (id)",
+          "table": "public.order_items",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "order_items_order_id_index",
+          "def": "CREATE INDEX order_items_order_id_index ON public.order_items USING btree (order_id)",
+          "table": "public.order_items",
+          "columns": [
+            "order_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "order_items_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.order_items",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "order_items_order_id_not_null",
+          "type": "n",
+          "def": "NOT NULL order_id",
+          "table": "public.order_items",
+          "referenced_table": "",
+          "columns": [
+            "order_id"
+          ]
+        },
+        {
+          "name": "order_items_product_id_not_null",
+          "type": "n",
+          "def": "NOT NULL product_id",
+          "table": "public.order_items",
+          "referenced_table": "",
+          "columns": [
+            "product_id"
+          ]
+        },
+        {
+          "name": "order_items_quantity_not_null",
+          "type": "n",
+          "def": "NOT NULL quantity",
+          "table": "public.order_items",
+          "referenced_table": "",
+          "columns": [
+            "quantity"
+          ]
+        },
+        {
+          "name": "order_items_unit_price_not_null",
+          "type": "n",
+          "def": "NOT NULL unit_price",
+          "table": "public.order_items",
+          "referenced_table": "",
+          "columns": [
+            "unit_price"
+          ]
+        },
+        {
+          "name": "order_items_product_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT",
+          "table": "public.order_items",
+          "referenced_table": "public.products",
+          "columns": [
+            "product_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "order_items_order_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE",
+          "table": "public.order_items",
+          "referenced_table": "public.orders",
+          "columns": [
+            "order_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "order_items_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.order_items",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.payments",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('payments_id_seq'::regclass)"
+        },
+        {
+          "name": "order_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "amount",
+          "type": "numeric(10,2)",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": "'pending'::character varying"
+        },
+        {
+          "name": "provider",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "provider_transaction_id",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "paid_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "payments_pkey",
+          "def": "CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)",
+          "table": "public.payments",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "payments_order_id_index",
+          "def": "CREATE INDEX payments_order_id_index ON public.payments USING btree (order_id)",
+          "table": "public.payments",
+          "columns": [
+            "order_id"
+          ]
+        },
+        {
+          "name": "payments_status_index",
+          "def": "CREATE INDEX payments_status_index ON public.payments USING btree (status)",
+          "table": "public.payments",
+          "columns": [
+            "status"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "payments_amount_not_null",
+          "type": "n",
+          "def": "NOT NULL amount",
+          "table": "public.payments",
+          "referenced_table": "",
+          "columns": [
+            "amount"
+          ]
+        },
+        {
+          "name": "payments_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.payments",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "payments_order_id_not_null",
+          "type": "n",
+          "def": "NOT NULL order_id",
+          "table": "public.payments",
+          "referenced_table": "",
+          "columns": [
+            "order_id"
+          ]
+        },
+        {
+          "name": "payments_status_check",
+          "type": "CHECK",
+          "def": "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'completed'::character varying, 'failed'::character varying, 'refunded'::character varying])::text[])))",
+          "table": "public.payments",
+          "referenced_table": "",
+          "columns": [
+            "status"
+          ]
+        },
+        {
+          "name": "payments_status_not_null",
+          "type": "n",
+          "def": "NOT NULL status",
+          "table": "public.payments",
+          "referenced_table": "",
+          "columns": [
+            "status"
+          ]
+        },
+        {
+          "name": "payments_order_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT",
+          "table": "public.payments",
+          "referenced_table": "public.orders",
+          "columns": [
+            "order_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "payments_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.payments",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.inventory_stocks",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('inventory_stocks_id_seq'::regclass)"
+        },
+        {
+          "name": "product_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "reserved",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "inventory_stocks_pkey",
+          "def": "CREATE UNIQUE INDEX inventory_stocks_pkey ON public.inventory_stocks USING btree (id)",
+          "table": "public.inventory_stocks",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_stocks_product_id_unique",
+          "def": "CREATE UNIQUE INDEX inventory_stocks_product_id_unique ON public.inventory_stocks USING btree (product_id)",
+          "table": "public.inventory_stocks",
+          "columns": [
+            "product_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "inventory_stocks_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.inventory_stocks",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_stocks_product_id_not_null",
+          "type": "n",
+          "def": "NOT NULL product_id",
+          "table": "public.inventory_stocks",
+          "referenced_table": "",
+          "columns": [
+            "product_id"
+          ]
+        },
+        {
+          "name": "inventory_stocks_quantity_not_null",
+          "type": "n",
+          "def": "NOT NULL quantity",
+          "table": "public.inventory_stocks",
+          "referenced_table": "",
+          "columns": [
+            "quantity"
+          ]
+        },
+        {
+          "name": "inventory_stocks_reserved_not_null",
+          "type": "n",
+          "def": "NOT NULL reserved",
+          "table": "public.inventory_stocks",
+          "referenced_table": "",
+          "columns": [
+            "reserved"
+          ]
+        },
+        {
+          "name": "inventory_stocks_product_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE",
+          "table": "public.inventory_stocks",
+          "referenced_table": "public.products",
+          "columns": [
+            "product_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_stocks_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.inventory_stocks",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_stocks_product_id_unique",
+          "type": "UNIQUE",
+          "def": "UNIQUE (product_id)",
+          "table": "public.inventory_stocks",
+          "referenced_table": "",
+          "columns": [
+            "product_id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.inventory_movements",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "default": "nextval('inventory_movements_id_seq'::regclass)"
+        },
+        {
+          "name": "product_id",
+          "type": "bigint",
+          "nullable": false
+        },
+        {
+          "name": "type",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "reference_type",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "reference_id",
+          "type": "bigint",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp(0) without time zone",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "inventory_movements_pkey",
+          "def": "CREATE UNIQUE INDEX inventory_movements_pkey ON public.inventory_movements USING btree (id)",
+          "table": "public.inventory_movements",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_movements_reference_type_reference_id_index",
+          "def": "CREATE INDEX inventory_movements_reference_type_reference_id_index ON public.inventory_movements USING btree (reference_type, reference_id)",
+          "table": "public.inventory_movements",
+          "columns": [
+            "reference_type",
+            "reference_id"
+          ]
+        },
+        {
+          "name": "inventory_movements_product_id_type_index",
+          "def": "CREATE INDEX inventory_movements_product_id_type_index ON public.inventory_movements USING btree (product_id, type)",
+          "table": "public.inventory_movements",
+          "columns": [
+            "product_id",
+            "type"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "inventory_movements_id_not_null",
+          "type": "n",
+          "def": "NOT NULL id",
+          "table": "public.inventory_movements",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_movements_product_id_not_null",
+          "type": "n",
+          "def": "NOT NULL product_id",
+          "table": "public.inventory_movements",
+          "referenced_table": "",
+          "columns": [
+            "product_id"
+          ]
+        },
+        {
+          "name": "inventory_movements_quantity_not_null",
+          "type": "n",
+          "def": "NOT NULL quantity",
+          "table": "public.inventory_movements",
+          "referenced_table": "",
+          "columns": [
+            "quantity"
+          ]
+        },
+        {
+          "name": "inventory_movements_type_check",
+          "type": "CHECK",
+          "def": "CHECK (((type)::text = ANY ((ARRAY['purchase'::character varying, 'sale'::character varying, 'reservation'::character varying, 'release'::character varying, 'adjustment'::character varying])::text[])))",
+          "table": "public.inventory_movements",
+          "referenced_table": "",
+          "columns": [
+            "type"
+          ]
+        },
+        {
+          "name": "inventory_movements_type_not_null",
+          "type": "n",
+          "def": "NOT NULL type",
+          "table": "public.inventory_movements",
+          "referenced_table": "",
+          "columns": [
+            "type"
+          ]
+        },
+        {
+          "name": "inventory_movements_product_id_foreign",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT",
+          "table": "public.inventory_movements",
+          "referenced_table": "public.products",
+          "columns": [
+            "product_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "inventory_movements_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.inventory_movements",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "table": "public.categories",
+      "columns": [
+        "parent_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.categories",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "zero_or_one",
+      "def": "FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL"
+    },
+    {
+      "table": "public.products",
+      "columns": [
+        "category_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.categories",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT"
+    },
+    {
+      "table": "public.orders",
+      "columns": [
+        "user_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.users",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT"
+    },
+    {
+      "table": "public.order_items",
+      "columns": [
+        "product_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.products",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT"
+    },
+    {
+      "table": "public.order_items",
+      "columns": [
+        "order_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.orders",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.payments",
+      "columns": [
+        "order_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.orders",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT"
+    },
+    {
+      "table": "public.inventory_stocks",
+      "columns": [
+        "product_id"
+      ],
+      "cardinality": "zero_or_one",
+      "parent_table": "public.products",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.inventory_movements",
+      "columns": [
+        "product_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.products",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT"
+    }
+  ],
+  "driver": {
+    "name": "postgres",
+    "database_version": "PostgreSQL 18.3 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+    "meta": {
+      "current_schema": "public",
+      "search_paths": [
+        "ecommerce",
+        "public"
+      ],
+      "dict": {
+        "Functions": "Stored procedures and functions"
+      }
+    }
+  }
+}
