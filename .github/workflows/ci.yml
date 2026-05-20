@@ -215,12 +215,9 @@ jobs:
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-      - name: Trigger App Runner deployment
-        run: |
-          aws apprunner start-deployment \
-            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
-
-      - name: Wait for deployment to complete
-        run: |
-          aws apprunner wait service-running \
-            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
+      - name: Deploy to App Runner
+        uses: awslabs/amazon-app-runner-deploy@v2.5.2
+        with:
+          service: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
+          image: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          wait-for-service-stability-seconds: 600
