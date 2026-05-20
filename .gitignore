@@ -1,1 +1,19 @@
+# Local tools
 .tools/
+
+# Terraform — secrets and generated artifacts
+infra/terraform/backend.hcl
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.backup
+**/tfplan
+**/override.tf
+**/override.tf.json
+
+# Local environment overrides
+.env
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db

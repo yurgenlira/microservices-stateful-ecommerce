@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Inventory\Models;
 
-use App\Modules\Catalog\Models\Product;
 use App\Modules\Inventory\Database\Factories\InventoryStockFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property int $quantity
+ * @property int $reserved
+ */
 class InventoryStock extends Model
 {
     /** @use HasFactory<InventoryStockFactory> */
@@ -22,9 +26,4 @@ class InventoryStock extends Model
         'quantity',
         'reserved',
     ];
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
 }

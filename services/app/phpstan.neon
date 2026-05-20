@@ -7,3 +7,9 @@ parameters:
         - app
     ignoreErrors:
         - identifier: missingType.generics
+
+services:
+    -
+        class: App\Rules\PHPStan\NoCrossModuleModelImportRule
+        tags:
+            - phpstan.rules.rule
