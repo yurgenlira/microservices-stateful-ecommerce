@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace App\Modules\Inventory\Models;
 
-use App\Modules\Catalog\Models\Product;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property string $type
+ * @property int $quantity
+ * @property string|null $reference_type
+ * @property int|null $reference_id
+ */
 class InventoryMovement extends Model
 {
     protected $fillable = [
@@ -18,11 +24,6 @@ class InventoryMovement extends Model
         'reference_type',
         'reference_id',
     ];
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
 
     public function reference(): MorphTo
     {

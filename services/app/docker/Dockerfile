@@ -28,7 +28,7 @@ RUN composer install \
     --prefer-dist
 
 COPY . .
-RUN composer dump-autoload --optimize --classmap-authoritative
+RUN composer dump-autoload --optimize --no-scripts
 
 # ==========================================
 # Stage: development
@@ -69,21 +69,30 @@ ENTRYPOINT ["entrypoint.sh"]
 # ==========================================
 FROM base AS production
 
+ARG APP_VERSION=unknown
+ENV APP_VERSION=${APP_VERSION}
+
 RUN addgroup -g 1000 -S www \
     && adduser -u 1000 -S www -G www
 
 COPY --from=composer-deps --chown=www:www /var/www /var/www
 
 RUN apk add --no-cache nginx \
-    && mkdir -p /run/nginx \
-    && chown -R www:www /run/nginx /var/log/nginx
+    && mkdir -p /run/nginx /run/php-fpm \
+        /var/lib/nginx/logs /var/lib/nginx/tmp \
+    && chown -R www:www /run/nginx /run/php-fpm \
+        /var/lib/nginx /var/log/nginx
 
 COPY --chown=www:www docker/php/www.conf        /usr/local/etc/php-fpm.d/www.conf
 COPY --chown=www:www docker/nginx/default.conf  /etc/nginx/http.d/default.conf
 COPY --chown=www:www docker/entrypoint.sh       /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-RUN mkdir -p storage/framework/{views,cache/data,sessions,testing}
+RUN mkdir -p storage/framework/views \
+    && mkdir -p storage/framework/cache/data \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/testing \
+    && chown -R www:www storage/
 
 USER www
 

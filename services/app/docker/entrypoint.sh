@@ -9,6 +9,11 @@ if [ "${APP_ENV:-local}" != "local" ] && [ -z "${APP_KEY}" ]; then
     exit 1
 fi
 
+mkdir -p storage/framework/views \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/testing
+
 if [ -f vendor/autoload.php ]; then
     php artisan optimize
 fi
