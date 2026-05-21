@@ -9,3 +9,7 @@ output "service_arn" {
 output "instance_role_arn" {
   value = aws_iam_role.instance.arn
 }
+
+output "ecr_access_role_arn" {
+  value = aws_iam_role.ecr_access.arn
+}
