@@ -1,0 +1,32 @@
+format: "0.3"
+title: "ecommerce-dev — Infrastructure"
+fontsize: 28
+iconsize: 128
+
+remove:
+  - module.app_runner.aws_apprunner_auto_scaling_configuration_version.this
+  - module.app_runner.aws_apprunner_service.this
+  - module.app_runner.aws_apprunner_vpc_connector.this
+  - module.app_runner.aws_iam_role.ecr_access
+  - module.app_runner.aws_iam_role.instance
+  - module.app_runner.aws_iam_role_policy.ssm_read
+  - module.app_runner.aws_iam_role_policy_attachment.ecr_access
+  - module.elasticache.aws_elasticache_subnet_group.this
+  - module.rds.aws_db_parameter_group.this
+  - module.rds.aws_db_subnet_group.this
+  - module.s3.aws_s3_bucket_lifecycle_configuration.storage
+  - module.s3.aws_s3_bucket_policy.storage
+  - module.s3.aws_s3_bucket_public_access_block.storage
+  - module.s3.aws_s3_bucket_server_side_encryption_configuration.storage
+  - module.s3.aws_s3_bucket_versioning.storage
+  - module.security_groups.aws_security_group.alb
+  - module.security_groups.aws_security_group.app
+  - module.security_groups.aws_security_group.rds
+  - module.security_groups.aws_security_group.redis
+  - module.vpc.aws_route_table.private
+  - module.vpc.aws_route_table.public
+  - module.vpc.aws_route_table_association.private[0]~1
+  - module.vpc.aws_route_table_association.private[1]~2
+  - module.vpc.aws_route_table_association.public[0]~1
+  - module.vpc.aws_route_table_association.public[1]~2
+  - aws_eip.elastic_ip

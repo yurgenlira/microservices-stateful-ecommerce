@@ -6,3 +6,35 @@ services:
       - ./docs/architecture:/usr/local/structurizr
     ports:
       - "8081:8080"
+
+  terravision:
+    image: patrickchugh/terravision:latest
+    command: draw --source /tf/environments/dev --format ${TV_FORMAT:-png} --outfile /output/infrastructure --varfile /tf/environments/dev/dev.tfvars --varfile /tf/environments/dev/terravision.tfvars
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE:-jlira@jlira.aws}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - TF_PLUGIN_CACHE_DIR=/tf-provider-cache
+    volumes:
+      - ./infra/terraform:/tf
+      - ./docs/architecture/exports:/output
+      - ~/.aws:/home/terravision/.aws:ro
+      - ./.terraform-cache:/tf-provider-cache
+    profiles:
+      - terravision
+
+  terravision-view:
+    image: patrickchugh/terravision:latest
+    command: visualise --source /tf/environments/dev --outfile /output/infrastructure --varfile /tf/environments/dev/dev.tfvars --varfile /tf/environments/dev/terravision.tfvars
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE:-jlira@jlira.aws}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - TF_PLUGIN_CACHE_DIR=/tf-provider-cache
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./infra/terraform:/tf
+      - ./docs/architecture/exports:/output
+      - ~/.aws:/home/terravision/.aws:ro
+      - ./.terraform-cache:/tf-provider-cache
+    profiles:
+      - terravision
