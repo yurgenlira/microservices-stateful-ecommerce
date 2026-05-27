@@ -19,6 +19,23 @@ pre-commit:
     pint:
       glob: "services/app/**/*.php"
       run: echo {staged_files} | tr ' ' '\n' | sed 's|services/app/||' | xargs -r docker compose --env-file services/app/.env exec -T app ./vendor/bin/pint --test
+    diagram-freshness:
+      glob: "docs/architecture/workspace.dsl"
+      run: |
+        if ! git diff --cached --name-only | grep -q 'docs/architecture/exports/'; then
+          echo "Error: workspace.dsl changed but diagram exports are not staged."
+          echo "Run 'make diagrams' and stage the updated PNGs."
+          exit 1
+        fi
+    diagram-terravision:
+      glob: "infra/terraform/**/*.tf"
+      exclude: "(variables|outputs|backend)\\.tf$"
+      run: |
+        if ! git diff --cached --name-only | grep -q 'docs/architecture/exports/infrastructure'; then
+          echo "Error: Terraform resource files changed but infrastructure diagram is not staged."
+          echo "Run 'make terravision' and stage the updated PNG."
+          exit 1
+        fi
 
 pre-push:
   commands:

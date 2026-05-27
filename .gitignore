@@ -14,6 +14,15 @@ infra/terraform/backend.hcl
 .env
 docker-compose.override.yml
 
+# Structurizr — local workspace cache (DSL source is committed, cache is not)
+.structurizr/
+
+# Terravision — generated override file and provider cache
+**/terravision_override.tf
+.terraform-cache/*
+!.terraform-cache/.gitkeep
+/docs/architecture/exports/*.bkp
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1,0 +1,822 @@
+{
+  "configuration" : { },
+  "description" : "Microservices stateful e-commerce system",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedDate" : "2026-05-26T18:48:46Z",
+  "model" : {
+    "deploymentNodes" : [ {
+      "description" : "CI/CD pipeline",
+      "environment" : "AWS — dev",
+      "id" : "24",
+      "infrastructureNodes" : [ {
+        "description" : "Build · Test · Deploy on push to main",
+        "environment" : "AWS — dev",
+        "id" : "25",
+        "name" : "CI Workflow",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ciWorkflow"
+        },
+        "relationships" : [ {
+          "description" : "docker push (SHA tag)",
+          "destinationId" : "31",
+          "id" : "51",
+          "sourceId" : "25",
+          "tags" : "Relationship",
+          "technology" : "HTTPS / OIDC"
+        }, {
+          "description" : "aws apprunner deploy",
+          "destinationId" : "34",
+          "id" : "52",
+          "sourceId" : "25",
+          "tags" : "Relationship",
+          "technology" : "HTTPS / OIDC"
+        } ],
+        "tags" : "Element,Infrastructure Node",
+        "technology" : "GitHub Actions"
+      } ],
+      "instances" : "1",
+      "name" : "GitHub Actions",
+      "properties" : {
+        "structurizr.dsl.identifier" : "973dce5a-3eb2-467c-ac36-263b519efe4e"
+      },
+      "tags" : "Element,Deployment Node",
+      "technology" : "github.com"
+    }, {
+      "containerInstances" : [ {
+        "containerId" : "12",
+        "environment" : "AWS — dev",
+        "id" : "27",
+        "instanceId" : 1,
+        "properties" : {
+          "structurizr.dsl.identifier" : "sentryNode"
+        },
+        "tags" : "Container Instance"
+      } ],
+      "description" : "Error monitoring SaaS",
+      "environment" : "AWS — dev",
+      "id" : "26",
+      "instances" : "1",
+      "name" : "Sentry.io",
+      "properties" : {
+        "structurizr.dsl.identifier" : "52e513ab-8026-4fb5-9ac5-1faad8ec9f4c"
+      },
+      "tags" : "Element,Deployment Node",
+      "technology" : "SaaS"
+    }, {
+      "children" : [ {
+        "children" : [ {
+          "description" : "Container image registry",
+          "environment" : "AWS — dev",
+          "id" : "30",
+          "infrastructureNodes" : [ {
+            "description" : "Stores production Docker images tagged by commit SHA",
+            "environment" : "AWS — dev",
+            "id" : "31",
+            "name" : "ecommerce",
+            "properties" : {
+              "structurizr.dsl.identifier" : "ecrRepo"
+            },
+            "tags" : "Element,Infrastructure Node",
+            "technology" : "ECR Repository"
+          } ],
+          "instances" : "1",
+          "name" : "ECR (shared)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "2dcf58a3-650a-4799-a25b-815cbe658b98"
+          },
+          "tags" : "Element,Deployment Node,AWS",
+          "technology" : "AWS Elastic Container Registry"
+        }, {
+          "children" : [ {
+            "containerInstances" : [ {
+              "containerId" : "4",
+              "environment" : "AWS — dev",
+              "id" : "34",
+              "instanceId" : 1,
+              "properties" : {
+                "structurizr.dsl.identifier" : "appInstance"
+              },
+              "relationships" : [ {
+                "description" : "Error events",
+                "destinationId" : "27",
+                "id" : "35",
+                "linkedRelationshipId" : "23",
+                "sourceId" : "34",
+                "technology" : "HTTPS"
+              }, {
+                "description" : "File storage",
+                "destinationId" : "38",
+                "id" : "39",
+                "linkedRelationshipId" : "22",
+                "sourceId" : "34",
+                "technology" : "HTTPS / IAM role"
+              }, {
+                "description" : "Domain data",
+                "destinationId" : "46",
+                "id" : "47",
+                "linkedRelationshipId" : "20",
+                "sourceId" : "34",
+                "technology" : "TCP 5432 / TLS"
+              }, {
+                "description" : "Cache",
+                "destinationId" : "49",
+                "id" : "50",
+                "linkedRelationshipId" : "21",
+                "sourceId" : "34",
+                "technology" : "TCP 6379 / TLS"
+              } ],
+              "tags" : "Container Instance"
+            } ],
+            "description" : "Scale-out when concurrency > 25 req/instance",
+            "environment" : "AWS — dev",
+            "id" : "33",
+            "instances" : "1",
+            "name" : "Auto Scaling: 1–10 instances",
+            "properties" : {
+              "structurizr.dsl.identifier" : "72317b1d-f69f-49e7-868a-c676c98f8b94"
+            },
+            "tags" : "Element,Deployment Node,AWS",
+            "technology" : "App Runner Scaling Policy"
+          } ],
+          "description" : "Managed compute — outside VPC",
+          "environment" : "AWS — dev",
+          "id" : "32",
+          "infrastructureNodes" : [ {
+            "description" : "Routes private traffic to RDS and ElastiCache subnets",
+            "environment" : "AWS — dev",
+            "id" : "36",
+            "name" : "VPC Connector",
+            "properties" : {
+              "structurizr.dsl.identifier" : "vpcConnector"
+            },
+            "relationships" : [ {
+              "description" : "private routing",
+              "destinationId" : "46",
+              "id" : "53",
+              "sourceId" : "36",
+              "tags" : "Relationship",
+              "technology" : "TCP 5432"
+            }, {
+              "description" : "private routing",
+              "destinationId" : "49",
+              "id" : "54",
+              "sourceId" : "36",
+              "tags" : "Relationship",
+              "technology" : "TCP 6379"
+            } ],
+            "tags" : "Element,Infrastructure Node",
+            "technology" : "App Runner VPC Connector"
+          } ],
+          "instances" : "1",
+          "name" : "App Runner",
+          "properties" : {
+            "structurizr.dsl.identifier" : "b2af91e6-8267-4b3e-9979-c1dafe07a83e"
+          },
+          "tags" : "Element,Deployment Node,AWS",
+          "technology" : "AWS App Runner"
+        }, {
+          "containerInstances" : [ {
+            "containerId" : "11",
+            "environment" : "AWS — dev",
+            "id" : "38",
+            "instanceId" : 1,
+            "properties" : {
+              "structurizr.dsl.identifier" : "s3Node"
+            },
+            "tags" : "Container Instance"
+          } ],
+          "description" : "Managed object storage",
+          "environment" : "AWS — dev",
+          "id" : "37",
+          "instances" : "1",
+          "name" : "S3",
+          "properties" : {
+            "structurizr.dsl.identifier" : "cf529acb-0198-49a4-84ea-0346daa04ebf"
+          },
+          "tags" : "Element,Deployment Node,AWS",
+          "technology" : "AWS S3"
+        }, {
+          "children" : [ {
+            "description" : "Internet-facing tier",
+            "environment" : "AWS — dev",
+            "id" : "41",
+            "infrastructureNodes" : [ {
+              "description" : "Inbound/outbound internet access",
+              "environment" : "AWS — dev",
+              "id" : "42",
+              "name" : "Internet Gateway",
+              "properties" : {
+                "structurizr.dsl.identifier" : "igw"
+              },
+              "tags" : "Element,Infrastructure Node",
+              "technology" : "AWS IGW"
+            }, {
+              "description" : "Outbound internet for private subnets",
+              "environment" : "AWS — dev",
+              "id" : "43",
+              "name" : "NAT Gateway",
+              "properties" : {
+                "structurizr.dsl.identifier" : "nat"
+              },
+              "tags" : "Element,Infrastructure Node",
+              "technology" : "AWS NAT Gateway"
+            } ],
+            "instances" : "1",
+            "name" : "Public Subnets — us-east-1a/b",
+            "properties" : {
+              "structurizr.dsl.identifier" : "6ebb07ac-86a6-4f98-9321-ae0cec29a2ee"
+            },
+            "tags" : "Element,Deployment Node,AWS",
+            "technology" : "AWS Subnets"
+          }, {
+            "children" : [ {
+              "containerInstances" : [ {
+                "containerId" : "9",
+                "environment" : "AWS — dev",
+                "id" : "46",
+                "instanceId" : 1,
+                "properties" : {
+                  "structurizr.dsl.identifier" : "rdsNode"
+                },
+                "tags" : "Container Instance"
+              } ],
+              "description" : "20 GB gp3 · 7-day backups · log_min_duration=500ms",
+              "environment" : "AWS — dev",
+              "id" : "45",
+              "instances" : "1",
+              "name" : "RDS — db.t3.micro",
+              "properties" : {
+                "structurizr.dsl.identifier" : "56777656-d0c9-462d-bfbc-8b15aca8e7b5"
+              },
+              "tags" : "Element,Deployment Node,AWS",
+              "technology" : "AWS RDS"
+            }, {
+              "containerInstances" : [ {
+                "containerId" : "10",
+                "environment" : "AWS — dev",
+                "id" : "49",
+                "instanceId" : 1,
+                "properties" : {
+                  "structurizr.dsl.identifier" : "cacheNode"
+                },
+                "tags" : "Container Instance"
+              } ],
+              "description" : "1 node · TLS + AUTH token · DB0=cache · DB1=sessions",
+              "environment" : "AWS — dev",
+              "id" : "48",
+              "instances" : "1",
+              "name" : "ElastiCache — cache.t3.micro",
+              "properties" : {
+                "structurizr.dsl.identifier" : "2c86c9d6-39f9-4971-9d79-b61eae1136c0"
+              },
+              "tags" : "Element,Deployment Node,AWS",
+              "technology" : "AWS ElastiCache"
+            } ],
+            "description" : "Data tier — no direct public access",
+            "environment" : "AWS — dev",
+            "id" : "44",
+            "instances" : "1",
+            "name" : "Private Subnets — us-east-1a/b",
+            "properties" : {
+              "structurizr.dsl.identifier" : "d1c48ff7-bac6-4348-9bf9-116bd6b4efdb"
+            },
+            "tags" : "Element,Deployment Node,AWS",
+            "technology" : "AWS Subnets"
+          } ],
+          "description" : "Isolated private network",
+          "environment" : "AWS — dev",
+          "id" : "40",
+          "instances" : "1",
+          "name" : "VPC ecommerce-dev (10.0.0.0/16)",
+          "properties" : {
+            "structurizr.dsl.identifier" : "d968e680-a9dc-466a-9676-7bbefc850e16"
+          },
+          "tags" : "Element,Deployment Node,AWS",
+          "technology" : "AWS VPC"
+        } ],
+        "description" : "AWS Region",
+        "environment" : "AWS — dev",
+        "id" : "29",
+        "instances" : "1",
+        "name" : "us-east-1 (N. Virginia)",
+        "properties" : {
+          "structurizr.dsl.identifier" : "389b0760-591c-4860-830c-01b6d85fb97c"
+        },
+        "tags" : "Element,Deployment Node",
+        "technology" : "AWS Region"
+      } ],
+      "description" : "Amazon Web Services",
+      "environment" : "AWS — dev",
+      "id" : "28",
+      "instances" : "1",
+      "name" : "AWS",
+      "properties" : {
+        "structurizr.dsl.identifier" : "7098d637-1d4e-4927-9c7d-54c3bcc8bb96"
+      },
+      "tags" : "Element,Deployment Node",
+      "technology" : "Cloud"
+    } ],
+    "people" : [ {
+      "description" : "End consumer shopping via web or mobile.",
+      "id" : "1",
+      "name" : "Customer",
+      "properties" : {
+        "structurizr.dsl.identifier" : "customer"
+      },
+      "relationships" : [ {
+        "description" : "Browses products, places orders",
+        "destinationId" : "4",
+        "id" : "13",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Browses products, places orders",
+        "destinationId" : "3",
+        "id" : "14",
+        "linkedRelationshipId" : "13",
+        "sourceId" : "1",
+        "technology" : "HTTPS"
+      } ],
+      "tags" : "Element,Person,Customer"
+    }, {
+      "description" : "Internal team managing catalog, orders and inventory.",
+      "id" : "2",
+      "name" : "Admin",
+      "properties" : {
+        "structurizr.dsl.identifier" : "admin"
+      },
+      "relationships" : [ {
+        "description" : "Manages catalog and inventory",
+        "destinationId" : "4",
+        "id" : "15",
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Manages catalog and inventory",
+        "destinationId" : "3",
+        "id" : "16",
+        "linkedRelationshipId" : "15",
+        "sourceId" : "2",
+        "technology" : "HTTPS"
+      } ],
+      "tags" : "Element,Person,Admin"
+    } ],
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "components" : [ {
+          "description" : "Registration, authentication, profile management.",
+          "documentation" : { },
+          "id" : "5",
+          "name" : "User Module",
+          "properties" : {
+            "structurizr.dsl.identifier" : "userModule"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Laravel Module"
+        }, {
+          "description" : "Product and category management.",
+          "documentation" : { },
+          "id" : "6",
+          "name" : "Catalog Module",
+          "properties" : {
+            "structurizr.dsl.identifier" : "catalogModule"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Laravel Module"
+        }, {
+          "description" : "Order lifecycle from cart to delivery.",
+          "documentation" : { },
+          "id" : "7",
+          "name" : "Ordering Module",
+          "properties" : {
+            "structurizr.dsl.identifier" : "orderingModule"
+          },
+          "relationships" : [ {
+            "description" : "UserServiceInterface",
+            "destinationId" : "5",
+            "id" : "17",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "PublicApi / in-process"
+          }, {
+            "description" : "CatalogServiceInterface",
+            "destinationId" : "6",
+            "id" : "18",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "PublicApi / in-process"
+          }, {
+            "description" : "InventoryServiceInterface",
+            "destinationId" : "8",
+            "id" : "19",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "PublicApi / in-process"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Laravel Module"
+        }, {
+          "description" : "Stock tracking and reservation.",
+          "documentation" : { },
+          "id" : "8",
+          "name" : "Inventory Module",
+          "properties" : {
+            "structurizr.dsl.identifier" : "inventoryModule"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Laravel Module"
+        } ],
+        "description" : "DDD modular monolith",
+        "documentation" : { },
+        "id" : "4",
+        "name" : "Laravel App",
+        "properties" : {
+          "structurizr.dsl.identifier" : "laravelApp"
+        },
+        "relationships" : [ {
+          "description" : "Domain data",
+          "destinationId" : "9",
+          "id" : "20",
+          "sourceId" : "4",
+          "tags" : "Relationship",
+          "technology" : "TCP 5432 / TLS"
+        }, {
+          "description" : "Cache",
+          "destinationId" : "10",
+          "id" : "21",
+          "sourceId" : "4",
+          "tags" : "Relationship",
+          "technology" : "TCP 6379 / TLS"
+        }, {
+          "description" : "File storage",
+          "destinationId" : "11",
+          "id" : "22",
+          "sourceId" : "4",
+          "tags" : "Relationship",
+          "technology" : "HTTPS / IAM role"
+        }, {
+          "description" : "Error events",
+          "destinationId" : "12",
+          "id" : "23",
+          "sourceId" : "4",
+          "tags" : "Relationship",
+          "technology" : "HTTPS"
+        } ],
+        "tags" : "Element,Container,App Runner",
+        "technology" : "PHP 8.5 / Laravel 13"
+      }, {
+        "description" : "Relational data",
+        "documentation" : { },
+        "id" : "9",
+        "name" : "Amazon RDS",
+        "properties" : {
+          "structurizr.dsl.identifier" : "rds"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "PostgreSQL 18 / VPC private"
+      }, {
+        "description" : "Cache and sessions",
+        "documentation" : { },
+        "id" : "10",
+        "name" : "Amazon ElastiCache",
+        "properties" : {
+          "structurizr.dsl.identifier" : "elasticache"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "Valkey 8.0 / VPC private"
+      }, {
+        "description" : "Object storage",
+        "documentation" : { },
+        "id" : "11",
+        "name" : "Amazon S3",
+        "properties" : {
+          "structurizr.dsl.identifier" : "s3Storage"
+        },
+        "tags" : "Element,Container",
+        "technology" : "AWS S3"
+      }, {
+        "description" : "Error monitoring",
+        "documentation" : { },
+        "id" : "12",
+        "name" : "Sentry",
+        "properties" : {
+          "structurizr.dsl.identifier" : "sentry"
+        },
+        "tags" : "Element,Container",
+        "technology" : "SaaS"
+      } ],
+      "description" : "Laravel 13 monolith with DDD module structure.",
+      "documentation" : { },
+      "id" : "3",
+      "name" : "E-commerce Platform",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ecommercePlatform"
+      },
+      "tags" : "Element,Software System,System"
+    } ]
+  },
+  "name" : "E-commerce Platform",
+  "properties" : {
+    "structurizr.inspection.error" : "5",
+    "structurizr.dsl" : "d29ya3NwYWNlICJFLWNvbW1lcmNlIFBsYXRmb3JtIiAiTWljcm9zZXJ2aWNlcyBzdGF0ZWZ1bCBlLWNvbW1lcmNlIHN5c3RlbSIgewoKICAgIG1vZGVsIHsKICAgICAgICBjdXN0b21lciA9IHBlcnNvbiAiQ3VzdG9tZXIiICJFbmQgY29uc3VtZXIgc2hvcHBpbmcgdmlhIHdlYiBvciBtb2JpbGUuIiAiQ3VzdG9tZXIiCiAgICAgICAgYWRtaW4gICAgPSBwZXJzb24gIkFkbWluIiAgICAiSW50ZXJuYWwgdGVhbSBtYW5hZ2luZyBjYXRhbG9nLCBvcmRlcnMgYW5kIGludmVudG9yeS4iICJBZG1pbiIKCiAgICAgICAgZWNvbW1lcmNlUGxhdGZvcm0gPSBzb2Z0d2FyZVN5c3RlbSAiRS1jb21tZXJjZSBQbGF0Zm9ybSIgIkxhcmF2ZWwgMTMgbW9ub2xpdGggd2l0aCBEREQgbW9kdWxlIHN0cnVjdHVyZS4iICJTeXN0ZW0iIHsKCiAgICAgICAgICAgIGxhcmF2ZWxBcHAgPSBjb250YWluZXIgIkxhcmF2ZWwgQXBwIiAiREREIG1vZHVsYXIgbW9ub2xpdGgiICJQSFAgOC41IC8gTGFyYXZlbCAxMyIgIkFwcCBSdW5uZXIiIHsgCiAgICAgICAgICAgICAgICB1c2VyTW9kdWxlICAgICAgPSBjb21wb25lbnQgIlVzZXIgTW9kdWxlIiAgICAgICJSZWdpc3RyYXRpb24sIGF1dGhlbnRpY2F0aW9uLCBwcm9maWxlIG1hbmFnZW1lbnQuIiAiTGFyYXZlbCBNb2R1bGUiCiAgICAgICAgICAgICAgICBjYXRhbG9nTW9kdWxlICAgPSBjb21wb25lbnQgIkNhdGFsb2cgTW9kdWxlIiAgICJQcm9kdWN0IGFuZCBjYXRlZ29yeSBtYW5hZ2VtZW50LiIgICAgICAgICAgICAgICAgICJMYXJhdmVsIE1vZHVsZSIKICAgICAgICAgICAgICAgIG9yZGVyaW5nTW9kdWxlICA9IGNvbXBvbmVudCAiT3JkZXJpbmcgTW9kdWxlIiAgIk9yZGVyIGxpZmVjeWNsZSBmcm9tIGNhcnQgdG8gZGVsaXZlcnkuIiAgICAgICAgICAgIkxhcmF2ZWwgTW9kdWxlIgogICAgICAgICAgICAgICAgaW52ZW50b3J5TW9kdWxlID0gY29tcG9uZW50ICJJbnZlbnRvcnkgTW9kdWxlIiAiU3RvY2sgdHJhY2tpbmcgYW5kIHJlc2VydmF0aW9uLiIgICAgICAgICAgICAgICAgICAiTGFyYXZlbCBNb2R1bGUiCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJkcyAgICAgICAgID0gY29udGFpbmVyICJBbWF6b24gUkRTIiAgICAgICAgICJSZWxhdGlvbmFsIGRhdGEiICAgICAgIlBvc3RncmVTUUwgMTggLyBWUEMgcHJpdmF0ZSIgIkRhdGFiYXNlIgogICAgICAgICAgICBlbGFzdGljYWNoZSA9IGNvbnRhaW5lciAiQW1hem9uIEVsYXN0aUNhY2hlIiAiQ2FjaGUgYW5kIHNlc3Npb25zIiAgICJWYWxrZXkgOC4wIC8gVlBDIHByaXZhdGUiICAgICJEYXRhYmFzZSIKICAgICAgICAgICAgczNTdG9yYWdlICAgPSBjb250YWluZXIgIkFtYXpvbiBTMyIgICAgICAgICAgIk9iamVjdCBzdG9yYWdlIiAgICAgICAiQVdTIFMzIgogICAgICAgICAgICBzZW50cnkgICAgICA9IGNvbnRhaW5lciAiU2VudHJ5IiAgICAgICAgICAgICAiRXJyb3IgbW9uaXRvcmluZyIgICAgICJTYWFTIgoKICAgICAgICB9CgogICAgICAgIGN1c3RvbWVyIC0+IGxhcmF2ZWxBcHAgIkJyb3dzZXMgcHJvZHVjdHMsIHBsYWNlcyBvcmRlcnMiICJIVFRQUyIKICAgICAgICBhZG1pbiAgICAtPiBsYXJhdmVsQXBwICJNYW5hZ2VzIGNhdGFsb2cgYW5kIGludmVudG9yeSIgICAiSFRUUFMiCgogICAgICAgIG9yZGVyaW5nTW9kdWxlIC0+IHVzZXJNb2R1bGUgICAgICAiVXNlclNlcnZpY2VJbnRlcmZhY2UiICAgICAgIlB1YmxpY0FwaSAvIGluLXByb2Nlc3MiCiAgICAgICAgb3JkZXJpbmdNb2R1bGUgLT4gY2F0YWxvZ01vZHVsZSAgICJDYXRhbG9nU2VydmljZUludGVyZmFjZSIgICAiUHVibGljQXBpIC8gaW4tcHJvY2VzcyIKICAgICAgICBvcmRlcmluZ01vZHVsZSAtPiBpbnZlbnRvcnlNb2R1bGUgIkludmVudG9yeVNlcnZpY2VJbnRlcmZhY2UiICJQdWJsaWNBcGkgLyBpbi1wcm9jZXNzIgoKICAgICAgICBsYXJhdmVsQXBwIC0+IHJkcyAgICAgICAgICJEb21haW4gZGF0YSIgICAiVENQIDU0MzIgLyBUTFMiCiAgICAgICAgbGFyYXZlbEFwcCAtPiBlbGFzdGljYWNoZSAiQ2FjaGUiICAgICAgICAgIlRDUCA2Mzc5IC8gVExTIgogICAgICAgIGxhcmF2ZWxBcHAgLT4gczNTdG9yYWdlICAgIkZpbGUgc3RvcmFnZSIgICJIVFRQUyAvIElBTSByb2xlIgogICAgICAgIGxhcmF2ZWxBcHAgLT4gc2VudHJ5ICAgICAgIkVycm9yIGV2ZW50cyIgICJIVFRQUyIKCiAgICAgICAgZGVwbG95bWVudEVudmlyb25tZW50ICJBV1Mg4oCUIGRldiIgewoKICAgICAgICAgICAgZGVwbG95bWVudE5vZGUgIkdpdEh1YiBBY3Rpb25zIiAiQ0kvQ0QgcGlwZWxpbmUiICJnaXRodWIuY29tIiB7CiAgICAgICAgICAgICAgICBjaVdvcmtmbG93ID0gaW5mcmFzdHJ1Y3R1cmVOb2RlICJDSSBXb3JrZmxvdyIgIkJ1aWxkIMK3IFRlc3QgwrcgRGVwbG95IG9uIHB1c2ggdG8gbWFpbiIgIkdpdEh1YiBBY3Rpb25zIgogICAgICAgICAgICB9CgogICAgICAgICAgICBkZXBsb3ltZW50Tm9kZSAiU2VudHJ5LmlvIiAiRXJyb3IgbW9uaXRvcmluZyBTYWFTIiAiU2FhUyIgewogICAgICAgICAgICAgICAgc2VudHJ5Tm9kZSA9IGNvbnRhaW5lckluc3RhbmNlIHNlbnRyeQogICAgICAgICAgICB9CgogICAgICAgICAgICBkZXBsb3ltZW50Tm9kZSAiQVdTIiAiQW1hem9uIFdlYiBTZXJ2aWNlcyIgIkNsb3VkIiB7CiAgICAgICAgICAgICAgICBkZXBsb3ltZW50Tm9kZSAidXMtZWFzdC0xIChOLiBWaXJnaW5pYSkiICJBV1MgUmVnaW9uIiAiQVdTIFJlZ2lvbiIgewoKICAgICAgICAgICAgICAgICAgICBkZXBsb3ltZW50Tm9kZSAiRUNSIChzaGFyZWQpIiAiQ29udGFpbmVyIGltYWdlIHJlZ2lzdHJ5IiAiQVdTIEVsYXN0aWMgQ29udGFpbmVyIFJlZ2lzdHJ5IiAiQVdTIiB7CiAgICAgICAgICAgICAgICAgICAgICAgIGVjclJlcG8gPSBpbmZyYXN0cnVjdHVyZU5vZGUgImVjb21tZXJjZSIgIlN0b3JlcyBwcm9kdWN0aW9uIERvY2tlciBpbWFnZXMgdGFnZ2VkIGJ5IGNvbW1pdCBTSEEiICJFQ1IgUmVwb3NpdG9yeSIKICAgICAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgICAgIGRlcGxveW1lbnROb2RlICJBcHAgUnVubmVyIiAiTWFuYWdlZCBjb21wdXRlIOKAlCBvdXRzaWRlIFZQQyIgIkFXUyBBcHAgUnVubmVyIiAiQVdTIiB7CiAgICAgICAgICAgICAgICAgICAgICAgIGRlcGxveW1lbnROb2RlICJBdXRvIFNjYWxpbmc6IDHigJMxMCBpbnN0YW5jZXMiICJTY2FsZS1vdXQgd2hlbiBjb25jdXJyZW5jeSA+IDI1IHJlcS9pbnN0YW5jZSIgIkFwcCBSdW5uZXIgU2NhbGluZyBQb2xpY3kiICJBV1MiIHsKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFwcEluc3RhbmNlID0gY29udGFpbmVySW5zdGFuY2UgbGFyYXZlbEFwcAogICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgIHZwY0Nvbm5lY3RvciA9IGluZnJhc3RydWN0dXJlTm9kZSAiVlBDIENvbm5lY3RvciIgIlJvdXRlcyBwcml2YXRlIHRyYWZmaWMgdG8gUkRTIGFuZCBFbGFzdGlDYWNoZSBzdWJuZXRzIiAiQXBwIFJ1bm5lciBWUEMgQ29ubmVjdG9yIgogICAgICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICAgICAgZGVwbG95bWVudE5vZGUgIlMzIiAiTWFuYWdlZCBvYmplY3Qgc3RvcmFnZSIgIkFXUyBTMyIgIkFXUyIgewogICAgICAgICAgICAgICAgICAgICAgICBzM05vZGUgPSBjb250YWluZXJJbnN0YW5jZSBzM1N0b3JhZ2UKICAgICAgICAgICAgICAgICAgICB9CgogICAgICAgICAgICAgICAgICAgIGRlcGxveW1lbnROb2RlICJWUEMgZWNvbW1lcmNlLWRldiAoMTAuMC4wLjAvMTYpIiAiSXNvbGF0ZWQgcHJpdmF0ZSBuZXR3b3JrIiAiQVdTIFZQQyIgIkFXUyIgewoKICAgICAgICAgICAgICAgICAgICAgICAgZGVwbG95bWVudE5vZGUgIlB1YmxpYyBTdWJuZXRzIOKAlCB1cy1lYXN0LTFhL2IiICJJbnRlcm5ldC1mYWNpbmcgdGllciIgIkFXUyBTdWJuZXRzIiAiQVdTIiB7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICBpZ3cgPSBpbmZyYXN0cnVjdHVyZU5vZGUgIkludGVybmV0IEdhdGV3YXkiICJJbmJvdW5kL291dGJvdW5kIGludGVybmV0IGFjY2VzcyIgIkFXUyBJR1ciCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBuYXQgPSBpbmZyYXN0cnVjdHVyZU5vZGUgIk5BVCBHYXRld2F5IiAiT3V0Ym91bmQgaW50ZXJuZXQgZm9yIHByaXZhdGUgc3VibmV0cyIgIkFXUyBOQVQgR2F0ZXdheSIKICAgICAgICAgICAgICAgICAgICAgICAgfQoKICAgICAgICAgICAgICAgICAgICAgICAgZGVwbG95bWVudE5vZGUgIlByaXZhdGUgU3VibmV0cyDigJQgdXMtZWFzdC0xYS9iIiAiRGF0YSB0aWVyIOKAlCBubyBkaXJlY3QgcHVibGljIGFjY2VzcyIgIkFXUyBTdWJuZXRzIiAiQVdTIiB7CgogICAgICAgICAgICAgICAgICAgICAgICAgICAgZGVwbG95bWVudE5vZGUgIlJEUyDigJQgZGIudDMubWljcm8iICIyMCBHQiBncDMgwrcgNy1kYXkgYmFja3VwcyDCtyBsb2dfbWluX2R1cmF0aW9uPTUwMG1zIiAiQVdTIFJEUyIgIkFXUyIgewogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJkc05vZGUgPSBjb250YWluZXJJbnN0YW5jZSByZHMKICAgICAgICAgICAgICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBkZXBsb3ltZW50Tm9kZSAiRWxhc3RpQ2FjaGUg4oCUIGNhY2hlLnQzLm1pY3JvIiAiMSBub2RlIMK3IFRMUyArIEFVVEggdG9rZW4gwrcgREIwPWNhY2hlIMK3IERCMT1zZXNzaW9ucyIgIkFXUyBFbGFzdGlDYWNoZSIgIkFXUyIgewogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNhY2hlTm9kZSA9IGNvbnRhaW5lckluc3RhbmNlIGVsYXN0aWNhY2hlCiAgICAgICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGNpV29ya2Zsb3cgLT4gZWNyUmVwbyAgICAgICAiZG9ja2VyIHB1c2ggKFNIQSB0YWcpIiAgICAgIkhUVFBTIC8gT0lEQyIKICAgICAgICAgICAgY2lXb3JrZmxvdyAtPiBhcHBJbnN0YW5jZSAgICJhd3MgYXBwcnVubmVyIGRlcGxveSIgICAgICAgIkhUVFBTIC8gT0lEQyIKICAgICAgICAgICAgdnBjQ29ubmVjdG9yIC0+IHJkc05vZGUgICAgICJwcml2YXRlIHJvdXRpbmciICAgICAgICAgICAgIlRDUCA1NDMyIgogICAgICAgICAgICB2cGNDb25uZWN0b3IgLT4gY2FjaGVOb2RlICAgInByaXZhdGUgcm91dGluZyIgICAgICAgICAgICAiVENQIDYzNzkiCiAgICAgICAgfQogICAgfQoKICAgIHZpZXdzIHsKICAgICAgICBzeXN0ZW1Db250ZXh0IGVjb21tZXJjZVBsYXRmb3JtICJTeXN0ZW1Db250ZXh0IiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvTGF5b3V0IHRiCiAgICAgICAgfQoKICAgICAgICBjb250YWluZXIgZWNvbW1lcmNlUGxhdGZvcm0gIkNvbnRhaW5lcnMiIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9MYXlvdXQgdGIKICAgICAgICB9CgogICAgICAgIGNvbXBvbmVudCBsYXJhdmVsQXBwICJDb21wb25lbnRzIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvTGF5b3V0IHRiCiAgICAgICAgfQoKICAgICAgICBkZXBsb3ltZW50IGVjb21tZXJjZVBsYXRmb3JtICJBV1Mg4oCUIGRldiIgIkFXU0RlcGxveW1lbnQiIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9MYXlvdXQgdGIKICAgICAgICB9CgogICAgICAgIHN0eWxlcyB7CiAgICAgICAgICAgIGVsZW1lbnQgIlBlcnNvbiIgewogICAgICAgICAgICAgICAgc2hhcGUgUGVyc29uCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMxMTY4YmQKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJDdXN0b21lciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMTU2NWMwCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiQWRtaW4iIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzQ1MjdhMAogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIlN5c3RlbSIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMmU3ZDMyCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiQXBwIFJ1bm5lciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMzg4ZTNjCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiRGF0YWJhc2UiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEN5bGluZGVyCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNlNjUxMDAKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJBV1MiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzIzMmYzZQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkluZnJhc3RydWN0dXJlIE5vZGUiIHsKICAgICAgICAgICAgICAgIHNoYXBlIFJvdW5kZWRCb3gKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzU0NmU3YQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "containerId" : "4",
+      "elements" : [ {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Components",
+      "name" : "Component View: E-commerce Platform - Laravel App",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "17"
+      }, {
+        "id" : "18"
+      }, {
+        "id" : "19"
+      } ]
+    } ],
+    "configuration" : {
+      "styles" : {
+        "elements" : [ {
+          "background" : "#232f3e",
+          "color" : "#ffffff",
+          "tag" : "AWS"
+        }, {
+          "background" : "#4527a0",
+          "color" : "#ffffff",
+          "tag" : "Admin"
+        }, {
+          "background" : "#388e3c",
+          "color" : "#ffffff",
+          "tag" : "App Runner"
+        }, {
+          "background" : "#1565c0",
+          "color" : "#ffffff",
+          "tag" : "Customer"
+        }, {
+          "background" : "#e65100",
+          "color" : "#ffffff",
+          "shape" : "Cylinder",
+          "tag" : "Database"
+        }, {
+          "background" : "#546e7a",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "Infrastructure Node"
+        }, {
+          "background" : "#1168bd",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
+          "background" : "#2e7d32",
+          "color" : "#ffffff",
+          "tag" : "System"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Containers",
+      "name" : "Container View: E-commerce Platform",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "13"
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "20"
+      }, {
+        "id" : "21"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      } ],
+      "softwareSystemId" : "3"
+    } ],
+    "deploymentViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "24",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "25",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "26",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "27",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "28",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "29",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "30",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "31",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "32",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "33",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "34",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "36",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "37",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "38",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "40",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "41",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "42",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "43",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "44",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "45",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "46",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "48",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "49",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "environment" : "AWS — dev",
+      "key" : "AWSDeployment",
+      "name" : "Deployment View: E-commerce Platform - AWS — dev",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "35"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "47"
+      }, {
+        "id" : "50"
+      }, {
+        "id" : "51"
+      }, {
+        "id" : "52"
+      }, {
+        "id" : "53"
+      }, {
+        "id" : "54"
+      } ],
+      "softwareSystemId" : "3"
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "SystemContext",
+      "name" : "System Context View: E-commerce Platform",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "14"
+      }, {
+        "id" : "16"
+      } ],
+      "softwareSystemId" : "3"
+    } ]
+  }
+}
