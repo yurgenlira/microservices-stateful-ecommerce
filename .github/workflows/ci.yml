@@ -14,6 +14,8 @@ concurrency:
 jobs:
   quality:
     name: Code Quality
+    needs: changes
+    if: needs.changes.outputs.php == 'true' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
       pull-requests: write
@@ -89,7 +91,7 @@ jobs:
 
       - name: Run tests with coverage
         working-directory: services/app
-        run: ./vendor/bin/pest --coverage --coverage-clover storage/coverage/clover.xml
+        run: ./vendor/bin/pest --coverage --min=60 --coverage-clover storage/coverage/clover.xml
         env:
           DB_HOST: 127.0.0.1
           DB_PORT: 5432
@@ -105,7 +107,7 @@ jobs:
         with:
           filename: services/app/storage/coverage/clover.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          overall_coverage_fail_threshold: 1
+          overall_coverage_fail_threshold: 60
           file_coverage_error_min: 50
           file_coverage_warning_max: 75
 
@@ -154,34 +156,28 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
 
-  diagrams:
-    name: Architecture Diagrams
+  changes:
+    name: Detect changed paths
     runs-on: ubuntu-24.04
-
+    outputs:
+      php: ${{ steps.filter.outputs.php }}
     steps:
       - uses: actions/checkout@v6
-
-      - name: Export C4 diagrams
-        run: |
-          mkdir -p docs/architecture/exports
-          docker run --rm \
-            -v "${{ github.workspace }}/docs/architecture:/docs" \
-            extenda/structurizr-to-png:latest \
-            --path workspace.dsl \
-            --output exports \
-            --render-with structurizr
-
-      - name: Upload diagram artifacts
-        uses: actions/upload-artifact@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
         with:
-          name: architecture-diagrams
-          path: docs/architecture/exports/
-          retention-days: 30
+          filters: |
+            php:
+              - 'services/app/**'
 
   deploy:
     name: Deploy to App Runner
     needs: [quality, build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: |
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+      needs.build.result == 'success'
     runs-on: ubuntu-24.04
     permissions:
       id-token: write
@@ -189,6 +185,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
+      - uses: docker/setup-buildx-action@v4
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
@@ -201,19 +199,17 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push production image to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build --target production \
-            -f services/app/docker/Dockerfile \
-            --build-arg APP_VERSION="$IMAGE_TAG" \
-            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
-            -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
-            services/app
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+        uses: docker/build-push-action@v7
+        with:
+          context: ./services/app
+          file: services/app/docker/Dockerfile
+          target: production
+          build-args: APP_VERSION=${{ github.sha }}
+          cache-from: type=gha
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
 
       - name: Deploy to App Runner
         uses: awslabs/amazon-app-runner-deploy@v2.5.2
@@ -223,3 +219,13 @@ jobs:
           access-role-arn: ${{ secrets.APP_RUNNER_ACCESS_ROLE_ARN }}
           port: "8080"
           wait-for-service-stability-seconds: ${{ vars.APP_RUNNER_STABILITY_TIMEOUT || 900 }}
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v3
+        with:
+          release: ${{ github.sha }}
+          environment: dev
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
