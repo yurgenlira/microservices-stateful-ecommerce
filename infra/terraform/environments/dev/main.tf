@@ -78,7 +78,8 @@ module "app_runner" {
     AWS_BUCKET         = local.s3_bucket_name
     FILESYSTEM_DISK    = "s3"
     LOG_CHANNEL        = "stderr"
-    APP_DEBUG          = "false"
+    APP_DEBUG                = "false"
+    SENTRY_TRACES_SAMPLE_RATE = "0.1"
   }
 
   environment_secrets = {

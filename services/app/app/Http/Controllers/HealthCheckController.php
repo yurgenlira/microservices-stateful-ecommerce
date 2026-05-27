@@ -31,10 +31,12 @@ class HealthCheckController extends Controller
             $healthy = false;
         }
 
-        $checks['version'] = config('app.version', 'unknown');
-
         return response()->json(
-            ['status' => $healthy ? 'ok' : 'degraded', 'checks' => $checks],
+            [
+                'status' => $healthy ? 'ok' : 'degraded',
+                'checks' => $checks,
+                'version' => config('app.version', 'unknown'),
+            ],
             $healthy ? 200 : 503,
         );
     }

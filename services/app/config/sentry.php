@@ -25,7 +25,7 @@ return [
 
     // The release version of your application
     // Example with dynamic git hash: trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD'))
-    'release' => env('SENTRY_RELEASE'),
+    'release' => env('SENTRY_RELEASE', env('APP_VERSION')),
 
     // When left empty or `null` the Laravel environment will be used (usually discovered from `APP_ENV` in your `.env`)
     'environment' => env('SENTRY_ENVIRONMENT'),
@@ -67,8 +67,8 @@ return [
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_transactions
     'ignore_transactions' => [
-        // Ignore Laravel's default health URL
         '/up',
+        '/api/health',
     ],
 
     // Breadcrumb specific configuration
